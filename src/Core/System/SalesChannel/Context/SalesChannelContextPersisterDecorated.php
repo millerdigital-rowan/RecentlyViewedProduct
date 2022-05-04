@@ -6,6 +6,7 @@ use Doctrine\DBAL\Connection;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextPersister;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Shopware\Core\Checkout\Cart\CartPersisterInterface;
 
 class SalesChannelContextPersisterDecorated extends SalesChannelContextPersister
 {
@@ -22,12 +23,13 @@ class SalesChannelContextPersisterDecorated extends SalesChannelContextPersister
     public function __construct(
         SalesChannelContextPersister $decorated,
         Connection $connection,
-        EventDispatcherInterface $eventDispatcher
+        EventDispatcherInterface $eventDispatcher,
+        CartPersisterInterface $cartPersister
     ) {
         $this->decorated = $decorated;
         $this->connection = $connection;
 
-        parent::__construct($connection, $eventDispatcher);
+        parent::__construct($connection, $eventDispatcher, $cartPersister);
     }
 
     public function replace(string $oldToken, SalesChannelContext $context): string
@@ -47,7 +49,7 @@ class SalesChannelContextPersisterDecorated extends SalesChannelContextPersister
         return $newToken;
     }
 
-    public function delete(string $token): void
+    public function delete(string $token, ?string $salesChannelId = null, ?string $customerId = null): void
     {
         $this->decorated->delete($token);
 
